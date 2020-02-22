@@ -1,0 +1,9 @@
+$ glxinfo | grep OpenGL
+OpenGL vendor string: Broadcom
+OpenGL renderer string: V3D 4.2
+OpenGL version string: 2.1 Mesa 19.3.2
+OpenGL shading language version string: 1.20
+OpenGL extensions:
+OpenGL ES profile version string: OpenGL ES 3.1 Mesa 19.3.2
+OpenGL ES profile shading language version string: OpenGL ES GLSL ES 3.10
+OpenGL ES profile extensions:
