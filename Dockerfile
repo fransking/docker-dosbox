@@ -1,4 +1,4 @@
-FROM balenalib/raspberry-pi:build as build
+FROM balenalib/raspberry-pi-debian:build as build
 
 RUN echo "deb-src http://raspbian.raspberrypi.org/raspbian/ buster main contrib non-free rpi" >> /etc/apt/sources.list && \
     apt-get update && \
@@ -27,8 +27,12 @@ RUN mkdir /build && \
 
 RUN cd /build && \
     apt-get build-dep xorgxrdp && \
-    git clone https://salsa.debian.org/debian-remote-team/xorgxrdp.git && \
-    cd xorgxrdp && \
+    git clone https://salsa.debian.org/debian-remote-team/xorgxrdp.git
+
+RUN cd /build/xorgxrdp && \
+    #patch xorgxrdp according to https://github.com/neutrinolabs/xrdp/issues/1503
+    sed -i 's/GLAMOR_USE_EGL_SCREEN | GLAMOR_NO_DRI3/GLAMOR_USE_EGL_SCREEN/g' xrdpdev/xrdpdev.c && \ 
+    #end
     dpkg-buildpackage -rfakeroot -uc -b && \
     cd /build && \
     dpkg -i xorgxrdp*.deb
@@ -49,7 +53,7 @@ RUN cd /build && \
 
 
 
-FROM balenalib/raspberry-pi:run
+FROM balenalib/raspberry-pi-debian:run
 
 ENV LANG=en_GB.UTF-8
 ENV LANGUAGE=${LANG}
@@ -87,12 +91,12 @@ RUN apt-get install -y --no-install-recommends \
       x11vnc \
       xinit \
       lxterminal \
+      kbd \
       neverball && \
     apt-get upgrade && \
     apt-get autoremove && \
     rm -rf /var/lib/apt/lists/* 
 
-COPY etc/ /etc/
 COPY --from=build /var/lib/xrdp-pulseaudio-installer /var/lib/xrdp-pulseaudio-installer
 COPY --from=build /build/*.deb /tmp/
 
@@ -110,6 +114,8 @@ RUN useradd -m dosbox && \
     echo "allowed_users=anybody" > /etc/X11/Xwrapper.config && \
     echo "needs_root_rights=yes" >> /etc/X11/Xwrapper.config && \
     mkdir /var/run/dbus
+
+COPY etc/ /etc/
 
 EXPOSE 3389 5900
 CMD ["s6-svscan", "/etc/s6"]
