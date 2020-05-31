@@ -1,4 +1,4 @@
-# binkd
+# dosbox
 Raspberry Pi docker image for dosbox
 
 ## Quick Start
